@@ -15,10 +15,11 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 COPY composer.json composer.lock ./
-RUN composer install --no-interaction --no-progress --prefer-dist
+RUN composer install --no-interaction --no-progress --prefer-dist --no-scripts
 
 # Copy the rest
 COPY . .
+RUN composer dump-autoload
 
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
