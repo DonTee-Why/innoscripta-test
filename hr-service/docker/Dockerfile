@@ -1,4 +1,4 @@
-FROM php:8.3-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 # Build deps: install, compile extensions, then remove
 RUN apk add --no-cache --virtual .build-deps \
