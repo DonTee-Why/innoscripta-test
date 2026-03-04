@@ -21,7 +21,7 @@ RUN composer install --no-interaction --no-progress --prefer-dist --no-scripts
 COPY . .
 RUN composer dump-autoload
 
-COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY docker/nginx/default.conf /etc/nginx/nginx.conf
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
