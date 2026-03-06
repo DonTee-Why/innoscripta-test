@@ -64,7 +64,44 @@ class EmployeeServiceTest extends TestCase
         $this->assertDatabaseHas('employees', ['id' => $employee->id, 'name' => 'UpdatedName']);
     }
 
-    public function test_employee_service_computes_changed_fields_correctly(): void
+    public function test_employee_service_includes_changed_fields_for_single_updated_field(): void
+    {
+        $this->mock(EventPublisher::class)->shouldReceive('publish')
+            ->once()
+            ->withArgs(function (string $routingKey, array $payload) {
+                $changedFields = $payload['data']['changed_fields'];
+                $this->assertCount(1, $changedFields);
+                $this->assertContains('salary', $changedFields);
+                return true;
+            });
+
+        $employee = Employee::first();
+        $data = $this->buildValidPayload($employee, ['salary' => 99999]);
+
+        $service = $this->app->make(EmployeeService::class);
+        $service->update($employee, $data);
+    }
+
+    public function test_employee_service_excludes_unchanged_fields_from_changed_fields(): void
+    {
+        $this->mock(EventPublisher::class)->shouldReceive('publish')
+            ->once()
+            ->withArgs(function (string $routingKey, array $payload) {
+                $changedFields = $payload['data']['changed_fields'];
+                $this->assertContains('salary', $changedFields);
+                $this->assertNotContains('name', $changedFields);
+                $this->assertNotContains('last_name', $changedFields);
+                return true;
+            });
+
+        $employee = Employee::first();
+        $data = $this->buildValidPayload($employee, ['salary' => 99123]);
+
+        $service = $this->app->make(EmployeeService::class);
+        $service->update($employee, $data);
+    }
+
+    public function test_employee_service_includes_changed_fields_for_multiple_updated_fields(): void
     {
         $this->mock(EventPublisher::class)->shouldReceive('publish')
             ->once()
@@ -76,21 +113,10 @@ class EmployeeServiceTest extends TestCase
             });
 
         $employee = Employee::first();
-
-        $data = [
+        $data = $this->buildValidPayload($employee, [
             'name' => 'NewName',
-            'last_name' => $employee->last_name,
-            'country' => $employee->country,
             'salary' => 99999,
-        ];
-
-        if ($employee->country === 'USA') {
-            $data['ssn'] = $employee->ssn;
-            $data['address'] = $employee->address;
-        } else {
-            $data['tax_id'] = $employee->tax_id;
-            $data['goal'] = $employee->goal;
-        }
+        ]);
 
         $service = $this->app->make(EmployeeService::class);
         $service->update($employee, $data);
@@ -149,5 +175,25 @@ class EmployeeServiceTest extends TestCase
         }
 
         $this->assertDatabaseHas('employees', ['id' => $employeeId]);
+    }
+
+    private function buildValidPayload(Employee $employee, array $overrides = []): array
+    {
+        $data = [
+            'name' => $employee->name,
+            'last_name' => $employee->last_name,
+            'country' => $employee->country,
+            'salary' => $employee->salary,
+        ];
+
+        if ($employee->country === 'USA') {
+            $data['ssn'] = $employee->ssn;
+            $data['address'] = $employee->address;
+        } else {
+            $data['tax_id'] = $employee->tax_id;
+            $data['goal'] = $employee->goal;
+        }
+
+        return array_merge($data, $overrides);
     }
 }
