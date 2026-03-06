@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\Country;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreEmployeeRequest extends FormRequest
 {
@@ -22,14 +24,14 @@ class StoreEmployeeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'country' => 'required|string|max:255',
-            'salary' => 'required_if:country,USA,Germany|numeric',
-            'ssn' => 'required_if:country,USA|string|max:255',
-            'address' => 'required_if:country,USA|string|max:255',
-            'tax_id' => 'required_if:country,Germany|string|max:255',
-            'goal' => 'required_if:country,Germany|string|max:1000',
+            'name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'country' => ['required', 'string', Rule::in(Country::toArray())],
+            'salary' => ['required', 'numeric', 'gt:0'],
+            'ssn' => ['required_if:country,USA', 'nullable', 'string', 'max:255'],
+            'address' => ['required_if:country,USA', 'nullable', 'string', 'max:255'],
+            'tax_id' => ['required_if:country,Germany', 'nullable', 'string', 'max:255'],
+            'goal' => ['required_if:country,Germany', 'nullable', 'string', 'max:1000'],
         ];
     }
 }
