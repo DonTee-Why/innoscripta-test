@@ -106,4 +106,48 @@ class EmployeeServiceTest extends TestCase
         $this->assertTrue($result);
         $this->assertDatabaseMissing('employees', ['id' => $employeeId]);
     }
+
+    public function test_employee_service_rollback_on_update_failure(): void
+    {
+        $employee = Employee::where('country', 'USA')->first();
+        $originalName = $employee->name;
+        $originalSalary = $employee->salary;
+
+        try {
+            $this->employeeService->update($employee, [
+                'name' => null,
+                'last_name' => $employee->last_name,
+                'country' => $employee->country,
+                'salary' => $employee->salary,
+                'ssn' => $employee->ssn,
+                'address' => $employee->address,
+            ]);
+            $this->fail('Expected update to throw due to database constraint violation.');
+        } catch (\Throwable) {
+        }
+
+        $employee->refresh();
+        $this->assertSame($originalName, $employee->name);
+        $this->assertSame($originalSalary, $employee->salary);
+    }
+
+    public function test_employee_service_rollback_on_delete_failure(): void
+    {
+        $employee = Employee::first();
+        $employeeId = $employee->id;
+
+        Employee::deleting(function () {
+            throw new \RuntimeException('Forced delete failure');
+        });
+
+        try {
+            $this->employeeService->delete($employee);
+            $this->fail('Expected delete to throw due to forced model event failure.');
+        } catch (\RuntimeException) {
+        } finally {
+            Employee::flushEventListeners();
+        }
+
+        $this->assertDatabaseHas('employees', ['id' => $employeeId]);
+    }
 }

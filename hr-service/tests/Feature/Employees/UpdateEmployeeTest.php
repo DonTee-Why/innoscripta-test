@@ -198,6 +198,40 @@ class UpdateEmployeeTest extends TestCase
             ->assertJsonValidationErrors(['ssn']);
     }
 
+    public function test_it_requires_tax_id_and_goal_when_updating_country_from_usa_to_germany(): void
+    {
+        $employee = Employee::where('country', 'USA')->first();
+
+        $data = [
+            'name' => $employee->name,
+            'last_name' => $employee->last_name,
+            'country' => 'Germany',
+            'salary' => $employee->salary,
+        ];
+
+        $response = $this->putJson("/api/employees/{$employee->id}", $data);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['tax_id', 'goal']);
+    }
+
+    public function test_it_requires_ssn_and_address_when_updating_country_from_germany_to_usa(): void
+    {
+        $employee = Employee::where('country', 'Germany')->first();
+
+        $data = [
+            'name' => $employee->name,
+            'last_name' => $employee->last_name,
+            'country' => 'USA',
+            'salary' => $employee->salary,
+        ];
+
+        $response = $this->putJson("/api/employees/{$employee->id}", $data);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['ssn', 'address']);
+    }
+
     public function test_it_returns_not_found_when_updating_nonexistent_employee(): void
     {
         $response = $this->putJson('/api/employees/99999', [
