@@ -25,11 +25,11 @@ class UpdateEmployeeRequest extends FormRequest
             'name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'country' => 'required|string|max:255',
-            'salary' => 'required|numeric',
-            'ssn' => 'nullable|string|max:255',
-            'address' => 'nullable|string|max:255',
-            'tax_id' => 'nullable|string|max:255',
-            'goal' => 'nullable|string|max:1000',
+            'salary' => 'required_if:country,USA,Germany|numeric',
+            'ssn' => 'required_if:country,USA|string|max:255',
+            'address' => 'required_if:country,USA|string|max:255',
+            'tax_id' => 'required_if:country,Germany|string|max:255',
+            'goal' => 'required_if:country,Germany|string|max:1000',
         ];
     }
 }
