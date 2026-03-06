@@ -2,11 +2,16 @@
 
 namespace App\Services;
 
+use App\Contracts\EventPublisher;
 use App\Models\Employee;
+use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class EmployeeService
 {
+    public function __construct(private EventPublisher $eventPublisher) {}
     /**
      * Get a paginated list of employees.
      */
@@ -22,7 +27,20 @@ class EmployeeService
      */
     public function create(array $data): Employee
     {
-        return Employee::create($data);
+        $employee = Employee::create($data);
+
+        $employeeData = [
+            'employee_id' => $employee->id,
+            'changed_fields' => array_keys($data),
+            'employee' => $employee->toArray(),
+        ];
+
+        $this->publishEvent(
+            $employee->country,
+            'EmployeeCreated',
+            $employeeData
+        );
+        return $employee;
     }
 
     /**
@@ -30,9 +48,32 @@ class EmployeeService
      */
     public function update(Employee $employee, array $data): Employee
     {
-        $employee->update($data);
+        $employee->fill($data);
+        $changedFields = array_keys($employee->getDirty());
 
-        return $employee->fresh();
+        DB::beginTransaction();
+
+        try {
+            $employee->save();
+            DB::commit();
+
+            $employeeData = [
+                'employee_id' => $employee->id,
+                'changed_fields' => $changedFields,
+                'employee' => $employee->fresh()->toArray(),
+            ];
+
+            $this->publishEvent(
+                $employee->country,
+                'EmployeeUpdated',
+                $employeeData
+            );
+
+            return $employee->fresh();
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
     /**
@@ -40,6 +81,51 @@ class EmployeeService
      */
     public function delete(Employee $employee): bool
     {
-        return $employee->delete();
+        DB::beginTransaction();
+        try {
+            $employeeData = [
+                'employee_id' => $employee->id,
+                'changed_fields' => [],
+                'employee' => $employee->toArray(),
+            ];
+
+            $employee->delete();
+            DB::commit();
+
+            $this->publishEvent(
+                $employee->country,
+                'EmployeeDeleted',
+                $employeeData
+            );
+
+            return true;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    private function publishEvent(string $country, string $eventType, array $data): void
+    {
+        $routingKey = $this->mapEventTypeToRoutingKey($eventType, $country);
+        $payload = [
+            'event_type' => $eventType,
+            'event_id' => Str::uuid()->toString(),
+            'timestamp' => now()->toIso8601String(),
+            'country' => $country,
+            'data' => $data,
+        ];
+
+        $this->eventPublisher->publish($routingKey, $payload);
+    }
+
+    private function mapEventTypeToRoutingKey(string $eventType, string $country): string
+    {
+        return match ($eventType) {
+            'EmployeeCreated' => "employees.{$country}.created",
+            'EmployeeUpdated' => "employees.{$country}.updated",
+            'EmployeeDeleted' => "employees.{$country}.deleted",
+            default => throw new Exception("Invalid event type: {$eventType}"),
+        };
     }
 }
