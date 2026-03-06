@@ -27,7 +27,10 @@ class EmployeeService
      */
     public function create(array $data): Employee
     {
-        $employee = Employee::create($data);
+        DB::beginTransaction();
+        try {
+            $employee = Employee::create($data);
+            DB::commit();
 
         $employeeData = [
             'employee_id' => $employee->id,
@@ -40,7 +43,12 @@ class EmployeeService
             'EmployeeCreated',
             $employeeData
         );
+
         return $employee;
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
     /**
