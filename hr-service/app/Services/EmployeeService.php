@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Throwable;
 
 class EmployeeService
 {
@@ -32,20 +33,22 @@ class EmployeeService
             $employee = Employee::create($data);
             DB::commit();
 
-        $employeeData = [
-            'employee_id' => $employee->id,
-            'changed_fields' => array_keys($data),
-            'employee' => $employee->toArray(),
-        ];
+            $employee->fresh();
 
-        $this->publishEvent(
-            $employee->country,
-            'EmployeeCreated',
-            $employeeData
-        );
+            $employeeData = [
+                'employee_id' => $employee->id,
+                'changed_fields' => array_keys($data),
+                'employee' => $employee->toArray(),
+            ];
 
-        return $employee;
-        } catch (Exception $e) {
+            $this->publishEvent(
+                $employee->country,
+                'EmployeeCreated',
+                $employeeData
+            );
+
+            return $employee;
+        } catch (Throwable $e) {
             DB::rollBack();
             throw $e;
         }
@@ -78,7 +81,7 @@ class EmployeeService
             );
 
             return $employee->fresh();
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             DB::rollBack();
             throw $e;
         }
@@ -107,7 +110,7 @@ class EmployeeService
             );
 
             return true;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             DB::rollBack();
             throw $e;
         }
