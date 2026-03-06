@@ -353,4 +353,21 @@ class CreateEmployeeTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['country']);
     }
+
+    public function test_it_requires_tax_id_to_match_germany_format(): void
+    {
+        $data = [
+            'name' => 'Klaus',
+            'last_name' => 'Schmidt',
+            'country' => 'Germany',
+            'salary' => 65000,
+            'tax_id' => '123456789',
+            'goal' => 'Improve team efficiency',
+        ];
+
+        $response = $this->postJson('/api/employees', $data);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['tax_id']);
+    }
 }

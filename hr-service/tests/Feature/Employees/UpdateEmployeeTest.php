@@ -365,4 +365,22 @@ class UpdateEmployeeTest extends TestCase
 
         return $data;
     }
+
+    public function test_it_validates_tax_id_format_if_present_for_germany_on_update(): void
+    {
+        $employee = Employee::where('country', 'Germany')->first();
+
+        $data = [
+            'name' => $employee->name,
+            'last_name' => $employee->last_name,
+            'country' => 'Germany',
+            'salary' => $employee->salary,
+            'tax_id' => '123456789',
+        ];
+
+        $response = $this->putJson("/api/employees/{$employee->id}", $data);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['tax_id']);
+    }
 }
