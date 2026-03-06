@@ -30,7 +30,13 @@ class StoreEmployeeRequest extends FormRequest
             'salary' => ['required', 'numeric', 'gt:0'],
             'ssn' => ['required_if:country,USA', 'nullable', 'string', 'max:255'],
             'address' => ['required_if:country,USA', 'nullable', 'string', 'max:255'],
-            'tax_id' => ['required_if:country,Germany', 'nullable', 'string', 'max:255'],
+            'tax_id' => [
+                'required_if:country,Germany',
+                'nullable',
+                'string',
+                'max:255',
+                'regex:/^DE\d{9}$/',
+            ],
             'goal' => ['required_if:country,Germany', 'nullable', 'string', 'max:1000'],
         ];
     }
