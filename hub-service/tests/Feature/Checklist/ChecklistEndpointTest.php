@@ -2,24 +2,20 @@
 
 namespace Tests\Feature\Checklist;
 
-use App\Checklist\ChecklistEngine;
-use App\Infrastructure\Cache\ChecklistCacheRepository;
-use App\Infrastructure\Cache\EmployeeCacheRepository;
-use Mockery;
+use App\Services\ChecklistQueryService;
 use Mockery\MockInterface;
 use Tests\TestCase;
 
 class ChecklistEndpointTest extends TestCase
 {
-    private MockInterface $checklistCache;
+    /** @var ChecklistQueryService&MockInterface */
+    private MockInterface $checklistQueryService;
 
     public function setUp(): void
     {
         parent::setUp();
 
-        $this->checklistCache = $this->mock(ChecklistCacheRepository::class);
-        $this->mock(EmployeeCacheRepository::class);
-        $this->mock(ChecklistEngine::class);
+        $this->checklistQueryService = $this->mock(ChecklistQueryService::class);
     }
 
     public function test_it_returns_checklist_payload_for_valid_country(): void
@@ -126,10 +122,10 @@ class ChecklistEndpointTest extends TestCase
 
     private function expectChecklistResponse(string $country, array $payload): void
     {
-        $this->checklistCache
-            ->shouldReceive('remember')
+        $this->checklistQueryService
+            ->shouldReceive('getByCountry')
             ->once()
-            ->with($country, Mockery::type('callable'))
+            ->with($country)
             ->andReturn($payload);
     }
 }
