@@ -19,7 +19,7 @@ class EmployeeUpdatedHandler implements EventHandlerInterface
 
     public function handle(array $event): void
     {
-        $country = $event['country'] ?? null;
+        $country = strtolower($event['country']) ?? null;
         $data = $event['data'] ?? null;
         $employeeId = $data['employee_id'] ?? null;
         $employee = $data['employee'] ?? null;

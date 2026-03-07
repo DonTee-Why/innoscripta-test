@@ -12,11 +12,9 @@ class ChecklistUpdatedBroadcast implements ShouldBroadcastNow
     use Dispatchable, SerializesModels;
 
     public function __construct(
-        public string $country,
+        public readonly string $country,
         public readonly array $payload,
-    ) {
-        $this->country = strtolower($this->country);
-    }
+    ) {}
 
     public function broadcastOn(): array
     {
