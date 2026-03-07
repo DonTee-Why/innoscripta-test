@@ -54,6 +54,18 @@ class RabbitMQJob extends BaseRabbitMQJob
         }
     }
 
+    public function failed($e): void
+    {
+        Log::error('RabbitMQ message permanently failed', [
+            'error' => $e->getMessage(),
+            'exception' => $e::class,
+            'raw_body' => $this->getRawBody(),
+            'trace' => $e->getTrace(),
+        ]);
+
+        parent::failed($e);
+    }
+
     private function decodePayload(): array
     {
         try {
