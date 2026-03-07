@@ -8,7 +8,7 @@ use App\Checklist\ChecklistEngine;
 use App\Infrastructure\Cache\ChecklistCacheRepository;
 use App\Infrastructure\Cache\EmployeeCacheRepository;
 
-final class ChecklistService
+final class ChecklistQueryService
 {
     public function __construct(
         private readonly EmployeeCacheRepository $employeeCacheRepository,
