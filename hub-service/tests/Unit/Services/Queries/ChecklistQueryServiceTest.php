@@ -10,7 +10,7 @@ use Mockery;
 use Mockery\MockInterface;
 use Tests\TestCase;
 
-class ChecklistServiceTest extends TestCase
+class ChecklistQueryServiceTest extends TestCase
 {
     /** @var EmployeeCacheRepository&MockInterface */
     private MockInterface $employeeCacheMock;
