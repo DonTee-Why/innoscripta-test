@@ -13,7 +13,7 @@ class EmployeeUpdatedBroadcast implements ShouldBroadcastNow
     use SerializesModels;
 
     public function __construct(
-        public readonly string $country,
+        public string $country,
         public readonly int $employeeId,
         public readonly array $payload,
     ) {
