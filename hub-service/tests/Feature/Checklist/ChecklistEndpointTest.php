@@ -37,21 +37,21 @@ class ChecklistEndpointTest extends TestCase
 
         $this->expectChecklistResponse('USA', $payload);
 
-        $response = $this->getJson('/api/checklist?country=USA');
+        $response = $this->getJson('/api/checklists?country=USA');
 
         $response->assertOk()->assertExactJson($payload);
     }
 
     public function test_it_validates_country_query_parameter_is_required(): void
     {
-        $response = $this->getJson('/api/checklist');
+        $response = $this->getJson('/api/checklists');
 
         $response->assertStatus(422)->assertJsonValidationErrors(['country']);
     }
 
     public function test_it_validates_country_query_parameter_is_supported(): void
     {
-        $response = $this->getJson('/api/checklist?country=France');
+        $response = $this->getJson('/api/checklists?country=France');
 
         $response->assertStatus(422)->assertJsonValidationErrors(['country']);
     }
@@ -80,7 +80,7 @@ class ChecklistEndpointTest extends TestCase
 
         $this->expectChecklistResponse('USA', $payload);
 
-        $response = $this->getJson('/api/checklist?country=USA');
+        $response = $this->getJson('/api/checklists?country=USA');
 
         $response->assertOk()
             ->assertJsonStructure([
@@ -119,7 +119,7 @@ class ChecklistEndpointTest extends TestCase
 
         $this->expectChecklistResponse('Germany', $payload);
 
-        $response = $this->getJson('/api/checklist?country=Germany');
+        $response = $this->getJson('/api/checklists?country=Germany');
 
         $response->assertOk()->assertExactJson($payload);
     }
