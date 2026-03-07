@@ -16,7 +16,9 @@ class EmployeeDeletedBroadcast implements ShouldBroadcastNow
         public readonly string $country,
         public readonly int $employeeId,
         public readonly array $payload,
-    ) {}
+    ) {
+        $this->country = strtolower($this->country);
+    }
 
     public function broadcastOn(): array
     {

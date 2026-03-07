@@ -14,7 +14,9 @@ class ChecklistUpdatedBroadcast implements ShouldBroadcastNow
     public function __construct(
         public readonly string $country,
         public readonly array $payload,
-    ) {}
+    ) {
+        $this->country = strtolower($this->country);
+    }
 
     public function broadcastOn(): array
     {
