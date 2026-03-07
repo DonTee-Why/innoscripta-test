@@ -3,6 +3,7 @@
 namespace App\EventHandlers;
 
 use App\Contracts\EventHandlerInterface;
+use App\Infrastructure\Broadcasting\Broadcaster;
 use App\Infrastructure\Cache\ChecklistCacheRepository;
 use App\Infrastructure\Cache\EmployeeCacheRepository;
 use Illuminate\Support\Facades\Log;
@@ -13,7 +14,7 @@ class EmployeeCreatedHandler implements EventHandlerInterface
     public function __construct(
         private readonly EmployeeCacheRepository $employeeCacheRepository,
         private readonly ChecklistCacheRepository $checklistCacheRepository,
-        // private readonly Broadcaster $broadcaster,
+        private readonly Broadcaster $broadcaster,
     ) {}
 
     public function handle(array $event): void
@@ -47,26 +48,26 @@ class EmployeeCreatedHandler implements EventHandlerInterface
         $this->employeeCacheRepository->invalidatePaginatedLists($country);
         $this->checklistCacheRepository->invalidate($country);
 
-        // $this->broadcaster->broadcastEmployeeCreated(
-        //     country: $country,
-        //     employeeId: $employeeId,
-        //     payload: [
-        //         'event_type' => 'EmployeeCreated',
-        //         'employee_id' => $employeeId,
-        //         'changed_fields' => $changedFields,
-        //         'employee' => $employee,
-        //     ]
-        // );
+        $this->broadcaster->broadcastEmployeeCreated(
+            country: $country,
+            employeeId: $employeeId,
+            payload: [
+                'event_type' => 'EmployeeCreated',
+                'employee_id' => $employeeId,
+                'changed_fields' => $changedFields,
+                'employee' => $employee,
+            ]
+        );
 
-        // $this->broadcaster->broadcastChecklistUpdated(
-        //     country: $country,
-        //     payload: [
-        //         'event_type' => 'ChecklistInvalidated',
-        //         'country' => $country,
-        //         'employee_id' => $employeeId,
-        //         'reason' => 'employee_created',
-        //     ]
-        // );
+        $this->broadcaster->broadcastChecklistUpdated(
+            country: $country,
+            payload: [
+                'event_type' => 'ChecklistInvalidated',
+                'country' => $country,
+                'employee_id' => $employeeId,
+                'reason' => 'employee_created',
+            ]
+        );
 
         Log::info('EmployeeCreated event handled successfully', [
             'event_id' => $event['event_id'] ?? null,

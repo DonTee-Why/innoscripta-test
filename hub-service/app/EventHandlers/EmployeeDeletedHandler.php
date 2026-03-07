@@ -3,6 +3,7 @@
 namespace App\EventHandlers;
 
 use App\Contracts\EventHandlerInterface;
+use App\Infrastructure\Broadcasting\Broadcaster;
 use App\Infrastructure\Cache\ChecklistCacheRepository;
 use App\Infrastructure\Cache\EmployeeCacheRepository;
 use Illuminate\Support\Facades\Log;
@@ -13,7 +14,7 @@ class EmployeeDeletedHandler implements EventHandlerInterface
     public function __construct(
         private readonly EmployeeCacheRepository $employeeCacheRepository,
         private readonly ChecklistCacheRepository $checklistCacheRepository,
-        // private readonly Broadcaster $broadcaster,
+        private readonly Broadcaster $broadcaster,
     ) {}
 
     public function handle(array $event): void
@@ -41,25 +42,25 @@ class EmployeeDeletedHandler implements EventHandlerInterface
         $this->employeeCacheRepository->invalidatePaginatedLists($country);
         $this->checklistCacheRepository->invalidate($country);
 
-        // $this->broadcaster->broadcastEmployeeDeleted(
-        //     country: $country,
-        //     employeeId: $employeeId,
-        //     payload: [
-        //         'event_type' => 'EmployeeDeleted',
-        //         'employee_id' => $employeeId,
-        //         'employee' => $employee,
-        //     ]
-        // );
+        $this->broadcaster->broadcastEmployeeDeleted(
+            country: $country,
+            employeeId: $employeeId,
+            payload: [
+                'event_type' => 'EmployeeDeleted',
+                'employee_id' => $employeeId,
+                'employee' => $employee,
+            ]
+        );
 
-        // $this->broadcaster->broadcastChecklistUpdated(
-        //     country: $country,
-        //     payload: [
-        //         'event_type' => 'ChecklistInvalidated',
-        //         'country' => $country,
-        //         'employee_id' => $employeeId,
-        //         'reason' => 'employee_deleted',
-        //     ]
-        // );
+        $this->broadcaster->broadcastChecklistUpdated(
+            country: $country,
+            payload: [
+                'event_type' => 'ChecklistInvalidated',
+                'country' => $country,
+                'employee_id' => $employeeId,
+                'reason' => 'employee_deleted',
+            ]
+        );
 
         Log::info('EmployeeDeleted event handled successfully', [
             'event_id' => $event['event_id'] ?? null,

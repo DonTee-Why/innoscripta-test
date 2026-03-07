@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Queries;
+namespace App\Services;
 
 use App\Checklist\ChecklistEngine;
 use App\Infrastructure\Cache\ChecklistCacheRepository;
