@@ -8,16 +8,6 @@ use InvalidArgumentException;
 class GermanyRules implements CountryChecklistRulesInterface
 {
     /**
-     * Check if the rules support a given country.
-     * @param string $country
-     * @return bool
-     */
-    public function supports(string $country): bool
-    {
-        return strtoupper($country) === 'GERMANY';
-    }
-
-    /**
      * @return array<string, callable(array): bool>
      */
     public function rules(): array
