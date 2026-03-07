@@ -6,12 +6,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ChecklistIndexRequest;
 use App\Http\Resources\ChecklistResource;
-use App\Services\ChecklistService;
+use App\Services\ChecklistQueryService;
 use Illuminate\Http\JsonResponse;
 
 class ChecklistController extends Controller
 {
-    public function index(ChecklistIndexRequest $request, ChecklistService $checklistService): JsonResponse
+    public function index(ChecklistIndexRequest $request, ChecklistQueryService $checklistService): JsonResponse
     {
         return ChecklistResource::make(
             $checklistService->getByCountry($request->getCountry())
