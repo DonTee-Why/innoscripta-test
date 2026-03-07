@@ -36,6 +36,17 @@ services:
       timeout: 5s
       retries: 20
 
+  soketi:
+    image: quay.io/soketi/soketi:latest
+    environment:
+      SOKETI_DEBUG: "1"
+      SOKETI_DEFAULT_APP_ID: app-id
+      SOKETI_DEFAULT_APP_KEY: app-key
+      SOKETI_DEFAULT_APP_SECRET: app-secret
+    ports:
+      - "6001:6001"
+      - "9601:9601"
+
   hr-service:
     build:
       context: ./hr-service
