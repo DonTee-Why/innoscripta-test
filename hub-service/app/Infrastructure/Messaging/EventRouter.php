@@ -6,8 +6,9 @@ use App\Contracts\EventHandlerInterface;
 use App\EventHandlers\EmployeeCreatedHandler;
 use App\EventHandlers\EmployeeDeletedHandler;
 use App\EventHandlers\EmployeeUpdatedHandler;
+use App\Infrastructure\Messaging\Exceptions\InvalidEventPayloadException;
+use App\Infrastructure\Messaging\Exceptions\UnsupportedEventTypeException;
 use Illuminate\Support\Facades\Log;
-use InvalidArgumentException;
 
 class EventRouter
 {
@@ -16,7 +17,7 @@ class EventRouter
         $eventType = $payload['event_type'] ?? null;
 
         if (! \is_string($eventType) || $eventType === '') {
-            throw new InvalidArgumentException('Event type is missing from payload.');
+            throw new InvalidEventPayloadException('Event type is missing from payload.');
         }
 
         Log::info('Routing incoming event', [
@@ -35,7 +36,7 @@ class EventRouter
             'EmployeeCreated' => app(EmployeeCreatedHandler::class),
             'EmployeeUpdated' => app(EmployeeUpdatedHandler::class),
             'EmployeeDeleted' => app(EmployeeDeletedHandler::class),
-            default => throw new InvalidArgumentException("Unsupported event type [{$eventType}]"),
+            default => throw new UnsupportedEventTypeException("Unsupported event type [{$eventType}]"),
         };
     }
 }
