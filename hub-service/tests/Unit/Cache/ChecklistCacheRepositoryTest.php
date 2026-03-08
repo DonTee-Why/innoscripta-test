@@ -22,7 +22,7 @@ class ChecklistCacheRepositoryTest extends TestCase
     {
         $payload = ['country' => 'USA', 'summary' => ['total_employees' => 1]];
 
-        $this->repository->remember('usa', fn () => $payload);
+        $this->repository->remember('USA', fn () => $payload);
 
         $this->assertSame($payload, Cache::get('hub:checklists:USA'));
     }
@@ -32,19 +32,19 @@ class ChecklistCacheRepositoryTest extends TestCase
         $payload = ['country' => 'USA'];
         Cache::put('hub:checklists:USA', $payload, now()->addMinutes(10));
 
-        $this->assertSame($payload, $this->repository->get('usa'));
+        $this->assertSame($payload, $this->repository->get('USA'));
     }
 
     public function test_it_returns_null_when_checklist_cache_is_missing(): void
     {
-        $this->assertNull($this->repository->get('usa'));
+        $this->assertNull($this->repository->get('USA'));
     }
 
     public function test_it_invalidates_checklist_cache_for_country(): void
     {
         Cache::put('hub:checklists:USA', ['ok' => true], now()->addMinutes(10));
 
-        $this->repository->invalidate('usa');
+        $this->repository->invalidate('USA');
 
         $this->assertNull(Cache::get('hub:checklists:USA'));
     }
@@ -53,7 +53,7 @@ class ChecklistCacheRepositoryTest extends TestCase
     {
         $calls = 0;
 
-        $result = $this->repository->remember('usa', function () use (&$calls): array {
+        $result = $this->repository->remember('USA', function () use (&$calls): array {
             $calls++;
 
             return ['computed' => true];
@@ -69,7 +69,7 @@ class ChecklistCacheRepositoryTest extends TestCase
         $calls = 0;
         Cache::put('hub:checklists:USA', ['cached' => true], now()->addMinutes(10));
 
-        $result = $this->repository->remember('usa', function () use (&$calls): array {
+        $result = $this->repository->remember('USA', function () use (&$calls): array {
             $calls++;
 
             return ['computed' => true];

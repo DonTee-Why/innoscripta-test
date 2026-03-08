@@ -14,7 +14,7 @@ class ChecklistRulesFactoryTest extends TestCase
     {
         $factory = new ChecklistRulesFactory();
 
-        $rules = $factory->make('usa');
+        $rules = $factory->make('USA');
 
         $this->assertInstanceOf(UsaRules::class, $rules);
     }
@@ -23,17 +23,19 @@ class ChecklistRulesFactoryTest extends TestCase
     {
         $factory = new ChecklistRulesFactory();
 
-        $rules = $factory->make('germany');
+        $rules = $factory->make('Germany');
 
         $this->assertInstanceOf(GermanyRules::class, $rules);
     }
 
-    public function test_it_accepts_case_insensitive_country_input(): void
+    public function test_it_throws_for_non_canonical_country_casing(): void
     {
         $factory = new ChecklistRulesFactory();
 
-        $this->assertInstanceOf(UsaRules::class, $factory->make('UsA'));
-        $this->assertInstanceOf(GermanyRules::class, $factory->make('GeRmAnY'));
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Unsupported country [UsA]');
+
+        $factory->make('UsA');
     }
 
     public function test_it_throws_for_unsupported_country(): void
