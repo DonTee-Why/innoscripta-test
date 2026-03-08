@@ -29,10 +29,14 @@ class GermanyRules implements CountryChecklistRulesInterface
         return [
             'salary' => 'Salary is required.',
             'goal' => 'Goal is required.',
-            'tax_id' => 'Tax ID is required.',
+            'tax_id' => 'Tax ID is invalid.',
         ];
     }
 
+    /**
+     * @param string $key
+     * @return string
+     */
     public function label(string $key): string
     {
         return match ($key) {

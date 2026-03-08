@@ -50,6 +50,6 @@ class ChecklistCacheRepository
      */
     private function key(string $country): string
     {
-        return self::CHECKLIST_CACHE_PREFIX . ':' . strtoupper($country);
+        return self::CHECKLIST_CACHE_PREFIX . ':' . $country;
     }
 }
