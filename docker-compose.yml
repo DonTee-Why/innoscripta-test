@@ -6,7 +6,9 @@ services:
       POSTGRES_USER: ${DB_USERNAME:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports: ["5432:5432"]
-    volumes: [pgdata:/var/lib/postgresql/data]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init-multiple-dbs.sh:/docker-entrypoint-initdb.d/init-multiple-dbs.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_DATABASE:-hr_db}"]
       interval: 5s
@@ -55,27 +57,40 @@ services:
     restart: always
     ports:
       - "8081:80"
+    env_file:
+      - ./hr-service/.env
     environment:
-      APP_ENV: local
-      APP_DEBUG: "true"
       APP_URL: http://localhost:8081
-
-      DB_CONNECTION: pgsql
       DB_HOST: postgres
-      DB_PORT: 5432
-      DB_DATABASE: ${DB_DATABASE:-hr_db}
-      DB_USERNAME: ${DB_USERNAME:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD:-postgres}
-
       REDIS_HOST: redis
-      REDIS_PORT: 6379
-
       RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
-      RABBITMQ_USER: guest
-      RABBITMQ_PASSWORD: guest
     volumes:
       - ./hr-service:/var/www/html
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  hub-service:
+    build:
+      context: ./hub-service
+      dockerfile: docker/Dockerfile
+    container_name: hub_service
+    restart: always
+    ports:
+      - "8082:80"
+    env_file:
+      - ./hub-service/.env
+    environment:
+      APP_URL: http://localhost:8082
+      DB_HOST: postgres
+      REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+    volumes:
+      - ./hub-service:/var/www/html
     depends_on:
       postgres:
         condition: service_healthy
