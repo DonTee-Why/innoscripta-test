@@ -11,12 +11,14 @@ final class SchemaService
 {
     public function getByStepAndCountry(string $stepId, string $country): array
     {
-        $normalizedStepId = strtolower($stepId);
+        if (!\in_array($country, Country::toArray())) {
+            throw new InvalidArgumentException("Unsupported country [{$country}]");
+        }
 
         return [
             'country' => $country,
-            'step_id' => $normalizedStepId,
-            'widgets' => match ($normalizedStepId) {
+            'step_id' => $stepId,
+            'widgets' => match ($stepId) {
                 'dashboard' => $this->dashboardWidgets($country),
                 'employees' => $this->employeesWidgets($country),
                 'documentation' => $this->documentationWidgets($country),
@@ -35,7 +37,7 @@ final class SchemaService
                     'title' => 'Employee Count',
                     'data_source' => '/api/employees?country=USA',
                     'realtime' => [
-                        'channel' => 'country.usa.employees',
+                        'channel' => "country.{$country}.employees",
                         'event' => 'employee.updated',
                     ],
                 ],
@@ -45,7 +47,7 @@ final class SchemaService
                     'title' => 'Average Salary',
                     'data_source' => '/api/employees?country=USA',
                     'realtime' => [
-                        'channel' => 'country.usa.employees',
+                        'channel' => "country.{$country}.employees",
                         'event' => 'employee.updated',
                     ],
                 ],
@@ -55,7 +57,7 @@ final class SchemaService
                     'title' => 'Completion Rate',
                     'data_source' => '/api/checklists?country=USA',
                     'realtime' => [
-                        'channel' => 'country.usa.checklists',
+                        'channel' => "country.{$country}.checklists",
                         'event' => 'checklist.updated',
                     ],
                 ],
@@ -68,7 +70,7 @@ final class SchemaService
                     'title' => 'Employee Count',
                     'data_source' => '/api/employees?country=Germany',
                     'realtime' => [
-                        'channel' => 'country.germany.employees',
+                        'channel' => "country.{$country}.employees",
                         'event' => 'employee.updated',
                     ],
                 ],
@@ -78,7 +80,7 @@ final class SchemaService
                     'title' => 'Goal Tracking',
                     'data_source' => '/api/employees?country=Germany',
                     'realtime' => [
-                        'channel' => 'country.germany.employees',
+                        'channel' => "country.{$country}.employees",
                         'event' => 'employee.updated',
                     ],
                 ],
@@ -97,7 +99,7 @@ final class SchemaService
                 'title' => 'Employees',
                 'data_source' => "/api/employees?country={$country}",
                 'realtime' => [
-                    'channel' => 'country.' . strtolower($country) . '.employees',
+                    'channel' => "country.{$country}.employees",
                     'event' => 'employee.updated',
                 ],
             ],
