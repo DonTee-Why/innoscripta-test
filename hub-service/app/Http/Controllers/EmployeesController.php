@@ -9,7 +9,7 @@ use App\Http\Resources\EmployeeResource;
 use App\Services\EmployeeQueryService;
 use Illuminate\Http\JsonResponse;
 
-final class EmployeeController extends Controller
+final class EmployeesController extends Controller
 {
     public function __construct(
         private readonly EmployeeQueryService $employeeQueryService,

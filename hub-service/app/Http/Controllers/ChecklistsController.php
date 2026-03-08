@@ -9,12 +9,16 @@ use App\Http\Resources\ChecklistResource;
 use App\Services\ChecklistQueryService;
 use Illuminate\Http\JsonResponse;
 
-class ChecklistController extends Controller
+class ChecklistsController extends Controller
 {
-    public function index(ChecklistIndexRequest $request, ChecklistQueryService $checklistService): JsonResponse
+    public function __construct(
+        private readonly ChecklistQueryService $checklistQueryService,
+    ) {}
+
+    public function index(ChecklistIndexRequest $request): JsonResponse
     {
         return ChecklistResource::make(
-            $checklistService->getByCountry($request->getCountry())
+            $this->checklistQueryService->getByCountry($request->getCountry())
         )->response()->setStatusCode(200);
     }
 }
