@@ -13,6 +13,11 @@ class RabbitMQJob extends BaseRabbitMQJob
     public int $tries = 3;
     public array $backoff = [5, 15, 30];
 
+    public function getName(): string
+    {
+        return $this->payload()['event_type'];
+    }
+
     public function fire()
     {
         try {

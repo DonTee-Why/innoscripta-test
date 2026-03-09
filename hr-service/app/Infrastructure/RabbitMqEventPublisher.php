@@ -6,15 +6,15 @@ use App\Contracts\EventPublisher;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
+use PhpAmqpLib\Message\AMQPMessage;
 use Throwable;
+use VladimirYuldashev\LaravelQueueRabbitMQ\Queue\RabbitMQQueue;
 
 class RabbitMqEventPublisher implements EventPublisher
 {
     public function publish(string $routingKey, array $payload): void
     {
         $exchange = config('queue.connections.rabbitmq.options.exchange.name', 'hr.events');
-        $exchangeType = config('queue.connections.rabbitmq.options.exchange.type', 'topic');
-        $queue = config('queue.connections.rabbitmq.queue', 'hub.events');
         $jsonPayload = json_encode($payload, JSON_UNESCAPED_SLASHES);
 
         if ($jsonPayload === false) {
@@ -22,12 +22,15 @@ class RabbitMqEventPublisher implements EventPublisher
         }
 
         try {
-            Queue::connection('rabbitmq')
-                ->pushRaw($jsonPayload, $queue, [
-                    'exchange' => $exchange,
-                    'exchange_type' => $exchangeType,
-                    'routing_key' => $routingKey,
-                ]);
+            /** @var RabbitMQQueue $connection */
+            $connection = Queue::connection('rabbitmq');
+
+            $message = new AMQPMessage($jsonPayload, [
+                'content_type' => 'application/json',
+                'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT,
+            ]);
+
+            $connection->getChannel()->basic_publish($message, $exchange, $routingKey);
 
             Log::info('Published RabbitMQ event', [
                 'routing_key' => $routingKey,
