@@ -19,6 +19,7 @@ RUN composer install --no-interaction --no-progress --prefer-dist --no-scripts
 
 # Copy the rest
 COPY . .
+RUN cp .env.example .env
 RUN composer dump-autoload
 
 COPY docker/nginx/default.conf /etc/nginx/nginx.conf

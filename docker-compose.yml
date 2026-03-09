@@ -64,15 +64,11 @@ services:
     restart: always
     ports:
       - "8081:80"
-    env_file:
-      - ./hr-service/.env
     environment:
       APP_URL: http://localhost:8081
       DB_HOST: postgres
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
-    volumes:
-      - ./hr-service:/var/www/html
     networks:
       - app-network
     depends_on:
@@ -91,15 +87,11 @@ services:
     restart: always
     ports:
       - "8082:80"
-    env_file:
-      - ./hub-service/.env
     environment:
       APP_URL: http://localhost:8082
       DB_HOST: postgres
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
-    volumes:
-      - ./hub-service:/var/www/html
     networks:
       - app-network
     depends_on:
@@ -117,14 +109,10 @@ services:
     container_name: hub_consumer
     restart: unless-stopped
     entrypoint: ["/usr/local/bin/entrypoint-queue.sh"]
-    env_file:
-      - ./hub-service/.env
     environment:
       DB_HOST: postgres
       REDIS_HOST: redis
       RABBITMQ_HOST: rabbitmq
-    volumes:
-      - ./hub-service:/var/www/html
     networks:
       - app-network
     depends_on:
