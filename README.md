@@ -16,11 +16,11 @@ A real-time, event-driven backend platform built with Laravel that demonstrates 
     - [Caching Strategy](#caching-strategy)
     - [Real-Time WebSocket Channels](#real-time-websocket-channels)
     - [Trade-offs](#trade-offs)
-    - [Separating Message Processing from the Queue Job](#separating-message-processing-from-the-queue-job)
-    - [Redis as the Hub Read Model Instead of a Database](#redis-as-the-hub-read-model-instead-of-a-database)
-    - [Direct RabbitMQ Publishing from the HR Service](#direct-rabbitmq-publishing-from-the-hr-service)
-    - [Public WebSocket Channels](#public-websocket-channels)
-    - [No Explicit Idempotency Layer](#no-explicit-idempotency-layer)
+      - [1. Separating Message Processing from the Queue Job](#1-separating-message-processing-from-the-queue-job)
+      - [2. Redis as the Hub Read Model Instead of a Database](#2-redis-as-the-hub-read-model-instead-of-a-database)
+      - [3. Direct RabbitMQ Publishing from the HR Service](#3-direct-rabbitmq-publishing-from-the-hr-service)
+      - [4. Public WebSocket Channels](#4-public-websocket-channels)
+      - [5. No Explicit Idempotency Layer](#5-no-explicit-idempotency-layer)
   - [Potential Improvements](#potential-improvements)
   - [Architecture](#architecture)
   - [Data Flow](#data-flow)
@@ -130,7 +130,7 @@ A test page is available at `http://localhost:8082/realtime-test` that connects 
 
 ### Trade-offs
 
-### Separating Message Processing from the Queue Job
+#### 1. Separating Message Processing from the Queue Job
 
 Instead of implementing all `RabbitMQ` payload handling logic directly inside the queue job class, I extracted the logic into a dedicated `RabbitMQMessageProcessor`.
 
@@ -138,7 +138,7 @@ Instead of implementing all `RabbitMQ` payload handling logic directly inside th
 
 **Trade-off:** This approach introduces an additional class and a layer of indirection. However, the improved testability and separation of concerns outweigh the extra abstraction.
 
-### Redis as the Hub Read Model Instead of a Database
+#### 2. Redis as the Hub Read Model Instead of a Database
 
 The Hub Service projects the employee data entirely to Redis rather than a relational database.
 
@@ -146,7 +146,7 @@ The Hub Service projects the employee data entirely to Redis rather than a relat
 
 **Trade-off:** Redis is an in-memory store. This means that if data is lost, the read model must be rebuilt by replaying events or reloading from the HR Service. In production, I would prefer a durable projection store or a formal replay mechanism..
 
-### Direct RabbitMQ Publishing from the HR Service
+#### 3. Direct RabbitMQ Publishing from the HR Service
 
 This is partly a tradeoff made as a result of a package constraint. The employee events are published directly using RabbitMQ's `basic_publish` instead of Laravel's queue abstraction which the selected RabbitMQ wrapper package uses.
 
@@ -156,7 +156,7 @@ This guarantees that events reach the correct topic exchange for the Hub service
 
 **Trade-off:** This bypasses Laravel's queue abstraction and requires interacting with the RabbitMQ PHP library directly. While this reduces framework abstraction, it provides predictable messaging behaviour for this architecture.
 
-### Public WebSocket Channels
+#### 4. Public WebSocket Channels
 
 Real-time events are broadcast on public channels rather than authenticated private channels.
 
@@ -164,7 +164,7 @@ Real-time events are broadcast on public channels rather than authenticated priv
 
 **Trade-off:** Public channels are not appropriate for sensitive data in production. A production system would secure these channels using authenticated private channels or by enforcing authorization policies for different channels.
 
-### No Explicit Idempotency Layer
+#### 5. No Explicit Idempotency Layer
 
 The Hub consumer does not implement an explicit idempotency store or inbox pattern.
 
