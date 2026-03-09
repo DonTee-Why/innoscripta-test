@@ -1,6 +1,8 @@
 services:
   postgres:
     image: postgres:16-alpine
+    networks:
+      - app-network
     environment:
       POSTGRES_DB: ${DB_DATABASE:-hr_db}
       POSTGRES_USER: ${DB_USERNAME:-postgres}
@@ -8,7 +10,6 @@ services:
     ports: ["5432:5432"]
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./docker/postgres/init-multiple-dbs.sh:/docker-entrypoint-initdb.d/init-multiple-dbs.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_DATABASE:-hr_db}"]
       interval: 5s
@@ -17,6 +18,8 @@ services:
 
   redis:
     image: redis:7-alpine
+    networks:
+      - app-network
     ports: ["6379:6379"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -26,6 +29,8 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
+    networks:
+      - app-network
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
@@ -40,6 +45,8 @@ services:
 
   soketi:
     image: quay.io/soketi/soketi:latest
+    networks:
+      - app-network
     environment:
       SOKETI_DEBUG: "1"
       SOKETI_DEFAULT_APP_ID: app-id
@@ -66,6 +73,8 @@ services:
       RABBITMQ_HOST: rabbitmq
     volumes:
       - ./hr-service:/var/www/html
+    networks:
+      - app-network
     depends_on:
       postgres:
         condition: service_healthy
@@ -91,6 +100,8 @@ services:
       RABBITMQ_HOST: rabbitmq
     volumes:
       - ./hub-service:/var/www/html
+    networks:
+      - app-network
     depends_on:
       postgres:
         condition: service_healthy
@@ -101,3 +112,7 @@ services:
 
 volumes:
   pgdata:
+
+networks:
+  app-network:
+    driver: bridge
