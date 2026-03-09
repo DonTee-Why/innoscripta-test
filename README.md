@@ -49,7 +49,6 @@ The platform currently supports **USA** and **Germany** as country configuration
 
 ## Technology Stack
 
-
 | Component          | Technology              | Version                    |
 | ------------------ | ----------------------- | -------------------------- |
 | Language           | PHP                     | 8.4                        |
@@ -60,9 +59,7 @@ The platform currently supports **USA** and **Germany** as country configuration
 | WebSocket Server   | Soketi                  | Latest (Pusher-compatible) |
 | Containerization   | Docker & Docker Compose | -                          |
 
-
 ### Key Packages
-
 
 | Package                                     | Service | Purpose                                |
 | ------------------------------------------- | ------- | -------------------------------------- |
@@ -70,20 +67,17 @@ The platform currently supports **USA** and **Germany** as country configuration
 | `pusher/pusher-php-server`                  | Hub     | Server-side Pusher/Soketi broadcasting |
 | `predis/predis`                             | Hub     | Redis client for PHP                   |
 
-
 ---
 
 ## Design Decisions and Tradeoffs
 
 ### RabbitMQ Topology
 
-
 | Component | Name                       | Type                       |
 | --------- | -------------------------- | -------------------------- |
 | Exchange  | `hr.events`                | Topic                      |
 | Queue     | `hub.events`               | Durable                    |
 | Binding   | `hub.events` ← `hr.events` | Routing key: `employees.#` |
-
 
 The Hub Consumer container automatically declares the exchange, queue, and bindings during startup before beginning message consumption.
 
@@ -104,13 +98,11 @@ The Hub Service uses **Redis** as its primary data store — functioning as a pr
 
 **What is cached:**
 
-
 | Data                     | Key Pattern              | Invalidation Trigger                    |
 | ------------------------ | ------------------------ | --------------------------------------- |
 | Employee snapshots       | Per-country Redis hashes | Employee created/updated/deleted events |
 | Paginated employee lists | Per-country, per-page    | Employee created/updated/deleted events |
 | Checklist summaries      | Per-country              | Employee created/updated/deleted events |
-
 
 **Why Redis:**
 
@@ -126,13 +118,11 @@ When an employee event is consumed, the handler invalidates the relevant cache e
 
 The Hub Service broadcasts events to Soketi on the following public channels:
 
-
 | Channel                        | Events                                                     |
 | ------------------------------ | ---------------------------------------------------------- |
 | `country.{code}.employees`     | `employee.created`, `employee.updated`, `employee.deleted` |
 | `country.{code}.employee.{id}` | `employee.updated`, `employee.deleted`                     |
 | `country.{code}.checklists`    | `checklist.updated`                                        |
-
 
 A test page is available at `http://localhost:8082/realtime-test` that connects to the WebSocket server, subscribes to channels, and displays events as they arrive.
 
@@ -154,7 +144,7 @@ The Hub Service projects the employee data entirely to Redis rather than a relat
 
 **Rationale:** The Hub is a projection and aggregation layer, not a system of record. Redis provides extremely fast reads, simple cache invalidation, and lightweight infrastructure. The Hub never needs complex queries as it serves pre-computed data.
 
-**Trade-off:** Redis is an in-memory store. This means that if data is lost, the read model must be rebuilt by replaying events or reloading from the HR Service. A persistent projection database would be preferable in production.
+**Trade-off:** Redis is an in-memory store. This means that if data is lost, the read model must be rebuilt by replaying events or reloading from the HR Service. In production, I would prefer a durable projection store or a formal replay mechanism..
 
 ### Direct RabbitMQ Publishing from the HR Service
 
@@ -255,7 +245,6 @@ This single command will:
 
 ### Access Points
 
-
 | Service                | URL                                                         |
 | ---------------------- | ----------------------------------------------------------- |
 | HR Service API         | `http://localhost:8081`                                     |
@@ -263,7 +252,6 @@ This single command will:
 | RabbitMQ Management UI | `http://localhost:15672` (username: guest, password: guest) |
 | WebSocket (Soketi)     | `ws://localhost:6001`                                       |
 | Real-Time Test Page    | `http://localhost:8082/realtime-test`                       |
-
 
 ---
 
@@ -273,7 +261,6 @@ This single command will:
 
 A Postman collection is included at `hr-service/postman/hr-service.postman_collection.json`.
 
-
 | Method   | Endpoint              | Description                |
 | -------- | --------------------- | -------------------------- |
 | `GET`    | `/api/employees`      | List employees (paginated) |
@@ -281,7 +268,6 @@ A Postman collection is included at `hr-service/postman/hr-service.postman_colle
 | `GET`    | `/api/employees/{id}` | Get employee by ID         |
 | `PUT`    | `/api/employees/{id}` | Update employee            |
 | `DELETE` | `/api/employees/{id}` | Delete employee            |
-
 
 **Create Employee (USA):**
 
@@ -315,14 +301,12 @@ POST /api/employees
 
 A Postman collection is included at `hub-service/postman/hub-service.postman_collection.json`.
 
-
 | Method | Endpoint               | Required Params | Description                                           |
 | ------ | ---------------------- | --------------- | ----------------------------------------------------- |
 | `GET`  | `/api/checklists`      | `country`       | Checklist completion data with per-employee status    |
 | `GET`  | `/api/employees`       | `country`       | Paginated employee list with country-specific columns |
 | `GET`  | `/api/steps`           | `country`       | Navigation steps for the UI                           |
 | `GET`  | `/api/schema/{stepId}` | `country`       | Widget configuration for a step (e.g., dashboard)     |
-
 
 ---
 
@@ -351,4 +335,3 @@ docker exec -it hub_service php artisan test
 - Feature tests: steps endpoint responses
 
 ---
-
