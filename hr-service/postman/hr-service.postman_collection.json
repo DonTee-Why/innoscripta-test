@@ -1,0 +1,213 @@
+{
+    "info": {
+        "_postman_id": "ff4b57ef-42db-456c-8e8d-8f96a8f2602f",
+        "name": "HR Service API",
+        "description": "Postman collection for the HR service employee API.\n\nBase URL defaults to docker-compose mapping: http://localhost:8081.\n\nValidation rules:\n- country: USA or Germany\n- salary: numeric and greater than 0\n- If country is USA: ssn and address are required\n- If country is Germany: tax_id (format DE#########) and goal are required",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [{
+        "name": "Employees",
+        "item": [{
+                "name": "List Employees",
+                "request": {
+                    "method": "GET",
+                    "header": [{
+                        "key": "Accept",
+                        "value": "application/json"
+                    }],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/employees?per_page=15",
+                        "host": [
+                            "{{baseUrl}}"
+                        ],
+                        "path": [
+                            "api",
+                            "employees"
+                        ],
+                        "query": [{
+                            "key": "per_page",
+                            "value": "15"
+                        }]
+                    },
+                    "description": "Returns paginated employees in `data`."
+                }
+            },
+            {
+                "name": "Create Employee (USA)",
+                "request": {
+                    "method": "POST",
+                    "header": [{
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        },
+                        {
+                            "key": "Accept",
+                            "value": "application/json"
+                        }
+                    ],
+                    "body": {
+                        "mode": "raw",
+                        "raw": "{\n  \"name\": \"Jane\",\n  \"last_name\": \"Smith\",\n  \"country\": \"USA\",\n  \"salary\": 75000,\n  \"ssn\": \"123-45-6789\",\n  \"address\": \"456 Oak Ave, Los Angeles, CA\"\n}"
+                    },
+                    "url": {
+                        "raw": "{{baseUrl}}/api/employees",
+                        "host": [
+                            "{{baseUrl}}"
+                        ],
+                        "path": [
+                            "api",
+                            "employees"
+                        ]
+                    },
+                    "description": "Creates a USA employee. Expects `201` with created resource in `data`."
+                }
+            },
+            {
+                "name": "Create Employee (Germany)",
+                "request": {
+                    "method": "POST",
+                    "header": [{
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        },
+                        {
+                            "key": "Accept",
+                            "value": "application/json"
+                        }
+                    ],
+                    "body": {
+                        "mode": "raw",
+                        "raw": "{\n  \"name\": \"Klaus\",\n  \"last_name\": \"Schmidt\",\n  \"country\": \"Germany\",\n  \"salary\": 65000,\n  \"tax_id\": \"DE123456789\",\n  \"goal\": \"Improve team efficiency\"\n}"
+                    },
+                    "url": {
+                        "raw": "{{baseUrl}}/api/employees",
+                        "host": [
+                            "{{baseUrl}}"
+                        ],
+                        "path": [
+                            "api",
+                            "employees"
+                        ]
+                    },
+                    "description": "Creates a Germany employee. Expects `201` with created resource in `data`."
+                }
+            },
+            {
+                "name": "Get Employee By ID",
+                "request": {
+                    "method": "GET",
+                    "header": [{
+                        "key": "Accept",
+                        "value": "application/json"
+                    }],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/employees/{{employeeId}}",
+                        "host": [
+                            "{{baseUrl}}"
+                        ],
+                        "path": [
+                            "api",
+                            "employees",
+                            "{{employeeId}}"
+                        ]
+                    },
+                    "description": "Returns one employee resource. Expects `200`, or `404` if not found."
+                }
+            },
+            {
+                "name": "Update Employee",
+                "request": {
+                    "method": "PUT",
+                    "header": [{
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        },
+                        {
+                            "key": "Accept",
+                            "value": "application/json"
+                        }
+                    ],
+                    "body": {
+                        "mode": "raw",
+                        "raw": "{\n  \"name\": \"Jane\",\n  \"last_name\": \"Smith\",\n  \"country\": \"USA\",\n  \"salary\": 80000,\n  \"ssn\": \"123-45-6789\",\n  \"address\": \"789 New St, Boston, MA\"\n}"
+                    },
+                    "url": {
+                        "raw": "{{baseUrl}}/api/employees/{{employeeId}}",
+                        "host": [
+                            "{{baseUrl}}"
+                        ],
+                        "path": [
+                            "api",
+                            "employees",
+                            "{{employeeId}}"
+                        ]
+                    },
+                    "description": "Updates employee by id. Supports partial payloads. Expects `200`, `404`, or `422`."
+                }
+            },
+            {
+                "name": "Delete Employee",
+                "request": {
+                    "method": "DELETE",
+                    "header": [{
+                        "key": "Accept",
+                        "value": "application/json"
+                    }],
+                    "url": {
+                        "raw": "{{baseUrl}}/api/employees/{{employeeId}}",
+                        "host": [
+                            "{{baseUrl}}"
+                        ],
+                        "path": [
+                            "api",
+                            "employees",
+                            "{{employeeId}}"
+                        ]
+                    },
+                    "description": "Deletes employee by id. Expects `204`, or `404` if not found."
+                }
+            },
+            {
+                "name": "Create Employee (Validation Error Example)",
+                "request": {
+                    "method": "POST",
+                    "header": [{
+                            "key": "Content-Type",
+                            "value": "application/json"
+                        },
+                        {
+                            "key": "Accept",
+                            "value": "application/json"
+                        }
+                    ],
+                    "body": {
+                        "mode": "raw",
+                        "raw": "{\n  \"name\": \"Invalid\",\n  \"last_name\": \"Payload\",\n  \"salary\": 0\n}"
+                    },
+                    "url": {
+                        "raw": "{{baseUrl}}/api/employees",
+                        "host": [
+                            "{{baseUrl}}"
+                        ],
+                        "path": [
+                            "api",
+                            "employees"
+                        ]
+                    },
+                    "description": "Intentional invalid payload. Expects `422` with Laravel validation errors."
+                }
+            }
+        ]
+    }],
+    "variable": [{
+            "key": "baseUrl",
+            "value": "http://localhost:8081",
+            "type": "string"
+        },
+        {
+            "key": "employeeId",
+            "value": "1",
+            "type": "string"
+        }
+    ]
+}
