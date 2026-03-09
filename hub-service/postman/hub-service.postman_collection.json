@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "3a99b6f4-1a7e-4cb4-ad11-87f6607f7d3f",
     "name": "Hub Service API",
-    "description": "Postman collection for hub-service API endpoints.\n\nBase URL defaults to docker-compose mapping: http://localhost:8082.\n\nSupported country values: USA, Germany.\nMost endpoints require the `country` query parameter and return 422 when missing/invalid.",
+    "description": "Postman collection for hub-service API endpoints.\n\nBase URL defaults to docker-compose mapping: http://localhost:8082.\n\nSupported country values: USA, Germany.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -21,20 +21,6 @@
             ],
             "url": "{{baseUrl}}/api/steps?country=USA",
             "description": "Returns navigation steps for a country.\n\nResponse shape:\n- country\n- steps[] { id, label, icon, order, path }"
-          }
-        },
-        {
-          "name": "Get Steps (Validation Error Example)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/api/steps?country=France",
-            "description": "Intentional invalid query. Expects 422 validation error on `country`."
           }
         }
       ]
@@ -55,20 +41,6 @@
             "url": "{{baseUrl}}/api/schema/{{stepId}}?country=USA",
             "description": "Returns UI schema for a given step and country.\n\nResponse shape:\n- country\n- step_id\n- widgets[] { id, type, title, data_source, realtime }"
           }
-        },
-        {
-          "name": "Get Step Schema (Validation Error Example)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/api/schema/{{stepId}}",
-            "description": "Intentional invalid query (missing country). Expects 422 validation error."
-          }
         }
       ]
     },
@@ -88,20 +60,6 @@
             "url": "{{baseUrl}}/api/employees?country=USA&page=1&per_page=15",
             "description": "Returns employee data for the selected country.\n\nQuery params:\n- country (required)\n- page (optional, integer >= 1)\n- per_page (optional, integer 1..100)\n\nResponse shape:\n- country\n- columns[]\n- data[]\n- meta { page, per_page, total, last_page }"
           }
-        },
-        {
-          "name": "Get Employees (Validation Error Example)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/api/employees?country=USA&page=0&per_page=101",
-            "description": "Intentional invalid query. Expects 422 validation errors for `page` and `per_page`."
-          }
         }
       ]
     },
@@ -120,20 +78,6 @@
             ],
             "url": "{{baseUrl}}/api/checklists?country=USA",
             "description": "Returns checklist summary and per-employee completion status for a country.\n\nResponse shape:\n- country\n- summary { total_employees, fully_complete_employees, incomplete_employees, average_completion_percentage }\n- employees[]"
-          }
-        },
-        {
-          "name": "Get Checklists (Validation Error Example)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": "{{baseUrl}}/api/checklists",
-            "description": "Intentional invalid query (missing country). Expects 422 validation error."
           }
         }
       ]
