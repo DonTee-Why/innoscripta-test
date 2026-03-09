@@ -100,7 +100,7 @@ class EmployeeCacheRepositoryTest extends TestCase
 
         $pageTwo = $this->repository->paginate('USA', page: 2, perPage: 2);
 
-        $this->assertSame([['id' => 3], ['id' => 4]], $pageTwo['data']);
+        $this->assertSame([['id' => 3], ['id' => 2]], $pageTwo['data']);
     }
 
     public function test_it_returns_paginated_meta_information_correctly(): void

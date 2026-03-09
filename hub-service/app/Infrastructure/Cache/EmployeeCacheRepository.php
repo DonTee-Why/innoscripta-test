@@ -98,6 +98,8 @@ class EmployeeCacheRepository
 
         $employees = array_values($this->all($country));
 
+        usort($employees, fn ($current, $next) => ($next['id'] ?? 0) <=> ($current['id'] ?? 0));
+
         $total = \count($employees);
         $offset = ($page - 1) * $perPage;
 
