@@ -110,6 +110,31 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  hub-consumer:
+    build:
+      context: ./hub-service
+      dockerfile: docker/Dockerfile
+    container_name: hub_consumer
+    restart: unless-stopped
+    entrypoint: ["/usr/local/bin/entrypoint-queue.sh"]
+    env_file:
+      - ./hub-service/.env
+    environment:
+      DB_HOST: postgres
+      REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+    volumes:
+      - ./hub-service:/var/www/html
+    networks:
+      - app-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
 volumes:
   pgdata:
 

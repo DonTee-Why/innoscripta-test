@@ -23,7 +23,8 @@ RUN composer dump-autoload
 
 COPY docker/nginx/default.conf /etc/nginx/nginx.conf
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+COPY docker/entrypoint-queue.sh /usr/local/bin/entrypoint-queue.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/entrypoint-queue.sh
 
 # Set permissions for the application
 RUN chown -R www-data:www-data /var/www/html \
