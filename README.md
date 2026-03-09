@@ -191,22 +191,43 @@ For a more resilient production-grade solution, there are some improvements I wi
 
 ```mermaid
 flowchart LR
-  Client[Frontend / Realtime Test Page] -->|HTTP| HubAPI[Hub Service API]
-  Client -->|WebSocket - Pusher Protocol| Soketi[Soketi]
 
-  HRAPI[HR Service API] -->|CRUD + DB writes| Postgres[(PostgreSQL)]
-  HRAPI -->|EmployeeCreated Updated Deleted| RabbitExchange[(RabbitMQ Exchange: hr.events)]
+  subgraph HR["HR Service"]
+    HRAPI[HR Service API]
+    Postgres[(PostgreSQL)]
+    RabbitExchange[(RabbitMQ Exchange: hr.events)]
+  end
 
-  RabbitExchange -->|Routing key employees.#| HubQueue[(RabbitMQ Queue: hub.events)]
+  subgraph HUB["Hub Service"]
+    HubAPI[Hub Service API]
+    HubQueue[(RabbitMQ Queue: hub.events)]
+    HubConsumer[Hub Consumer]
+    HubCore[Hub Event Handlers]
+    Redis[(Redis Cache)]
+  end
 
-  HubQueue -->|Consume messages| HubConsumer[Hub Consumer]
-  HubConsumer -->|Route and handle events| HubCore[Hub Event Handlers]
+  subgraph RT["Realtime"]
+    Soketi[Soketi]
+  end
 
-  HubCore -->|Update or invalidate| Redis[(Redis Cache)]
+  subgraph UI["Client"]
+    Client[Frontend / Realtime Test Page]
+  end
+
+  Client -->|HTTP| HubAPI
+  Client -->|WebSocket - Pusher Protocol| Soketi
+
+  HRAPI -->|CRUD + DB writes| Postgres
+  HRAPI -->|EmployeeCreated / Updated / Deleted| RabbitExchange
+
+  RabbitExchange -->|Routing key employees.#| HubQueue
+  HubQueue -->|Consume messages| HubConsumer
+  HubConsumer -->|Route and handle events| HubCore
+
+  HubCore -->|Update or invalidate| Redis
   HubCore -->|Broadcast updates| Soketi
 
-  HubAPI -->|Read model and checklist calculations| Redis
-  HubAPI -->|Server driven UI endpoints| Client
+  HubAPI -->|Read model + checklist calculations| Redis
 ```
 
 ---
