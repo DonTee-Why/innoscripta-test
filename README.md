@@ -192,21 +192,21 @@ For a more resilient production-grade solution, there are some improvements I wi
 ```mermaid
 flowchart LR
   Client[Frontend / Realtime Test Page] -->|HTTP| HubAPI[Hub Service API]
-  Client -->|WebSocket (Pusher Protocol)| Soketi[Soketi]
+  Client -->|WebSocket - Pusher Protocol| Soketi[Soketi]
 
   HRAPI[HR Service API] -->|CRUD + DB writes| Postgres[(PostgreSQL)]
-  HRAPI -->|EmployeeCreated/Updated/Deleted| RabbitExchange[(RabbitMQ Exchange: hr.events)]
+  HRAPI -->|EmployeeCreated Updated Deleted| RabbitExchange[(RabbitMQ Exchange: hr.events)]
 
-  RabbitExchange -->|Routing key: employees.#| HubQueue[(RabbitMQ Queue: hub.events)]
+  RabbitExchange -->|Routing key employees.#| HubQueue[(RabbitMQ Queue: hub.events)]
 
   HubQueue -->|Consume messages| HubConsumer[Hub Consumer]
-  HubConsumer -->|Route + Handle events| HubCore[Hub Event Handlers]
+  HubConsumer -->|Route and handle events| HubCore[Hub Event Handlers]
 
-  HubCore -->|Update/Invalidate| Redis[(Redis Cache)]
+  HubCore -->|Update or invalidate| Redis[(Redis Cache)]
   HubCore -->|Broadcast updates| Soketi
 
-  HubAPI -->|Read model + checklist calculations| Redis
-  HubAPI -->|Server-driven UI endpoints| Client
+  HubAPI -->|Read model and checklist calculations| Redis
+  HubAPI -->|Server driven UI endpoints| Client
 ```
 
 ---
