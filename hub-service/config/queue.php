@@ -76,7 +76,7 @@ return [
 
                 'queue' => [
                     'declare' => true,
-                    'job' => \App\Infrastructure\Messaging\RabbitMqJob::class,
+                    'job' => \App\Infrastructure\Messaging\RabbitMQJob::class,
                 ],
             ],
         ],
